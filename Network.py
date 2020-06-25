@@ -34,14 +34,23 @@ class PRSNet(nn.Module):
         self.FC11 = nn.Linear(in_features=64,out_features=32)
         self.FC21 = nn.Linear(in_features=64,out_features=32)
         self.FC31 = nn.Linear(in_features=64,out_features=32)
+        self.FC41 = nn.Linear(in_features=64,out_features=32)
+        self.FC51 = nn.Linear(in_features=64,out_features=32)
+        self.FC61 = nn.Linear(in_features=64,out_features=32)
 
         self.FC12 = nn.Linear(in_features=32,out_features=16)
         self.FC22 = nn.Linear(in_features=32,out_features=16)
         self.FC32 = nn.Linear(in_features=32,out_features=16)
+        self.FC42 = nn.Linear(in_features=32,out_features=16)
+        self.FC52 = nn.Linear(in_features=32,out_features=16)
+        self.FC62 = nn.Linear(in_features=32,out_features=16)
 
         self.FC13 = nn.Linear(in_features=16,out_features=4)
         self.FC23 = nn.Linear(in_features=16,out_features=4)
         self.FC33 = nn.Linear(in_features=16,out_features=4)
+        self.FC43 = nn.Linear(in_features=16,out_features=4)
+        self.FC53 = nn.Linear(in_features=16,out_features=4)
+        self.FC63 = nn.Linear(in_features=16,out_features=4)
 
         self.AF = nn.LeakyReLU(negative_slope=0.01, inplace=False)
 
@@ -54,19 +63,30 @@ class PRSNet(nn.Module):
             out = self.AF(self.MP(self.L5(out)))
             out = view(1-,64)
 
+            # o1,o2,o3 are for symmetry plane
+            # o4,o5,o6 are for rotation axis
             o1 = self.AF(self.FC11(out))
             o2 = self.AF(self.FC21(out))
             o3 = self.AF(self.FC31(out))
+            o4 = self.AF(self.FC41(out))
+            o5 = self.AF(self.FC51(out))
+            o6 = self.AF(self.FC61(out))
 
             o1 = self.AF(self.FC12(o1))
             o2 = self.AF(self.FC22(o2))
             o3 = self.AF(self.FC32(o3))
+            o4 = self.AF(self.FC42(o4))
+            o5 = self.AF(self.FC52(o5))
+            o6 = self.AF(self.FC62(o6))
 
             o1 = self.AF(self.FC13(o1))
             o2 = self.AF(self.FC23(o2))
             o3 = self.AF(self.FC33(o3))
+            o1 = self.AF(self.FC43(o4))
+            o2 = self.AF(self.FC53(o5))
+            o3 = self.AF(self.FC63(o6))
 
-            return (o1,o2,o3)
+            return (o1,o2,o3,o4,o5,o6)
 
 class SymmetryDistanceLoss(nn.Module):
     def __init__(self):
