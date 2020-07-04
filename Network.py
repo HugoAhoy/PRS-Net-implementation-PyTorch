@@ -86,6 +86,13 @@ class PRSNet(nn.Module):
             o2 = self.AF(self.FC53(o5))
             o3 = self.AF(self.FC63(o6))
 
+            o1 = o1/torch.norm(o1, dim = 1)
+            o2 = o2/torch.norm(o2, dim = 1)
+            o3 = o3/torch.norm(o3, dim = 1)
+            o4 = o4/torch.norm(o4, dim = 1)
+            o5 = o5/torch.norm(o5, dim = 1)
+            o6 = o6/torch.norm(o6, dim = 1)
+
             return (o1,o2,o3,o4,o5,o6)
 
 class SymmetryDistanceLoss(nn.Module):
@@ -93,12 +100,44 @@ class SymmetryDistanceLoss(nn.Module):
         super(SymmetryDistanceLoss, self).__init__()
     
     def forward(self, output, target):
-        # todo
+        batchSize = output.shape[0]
+        self.loss = torch.tensor(0)
+        for batch in range(batchSize):
+            self.Q = target[batch]['points']
+            self.ClosestGrid = target[batch]['closest']
+            self.batch = batch
+            self.SymPoints = []
+            for i in range(3):
+                self.ReflectiveDistance(target[batch][i])
 
+            for i in range(3,6):
+                self.RotationDistance(target[batch][i])
+            
+            self.loss = self.loss + self.totalDis()
+        
+        return self.loss/batchSize
+
+    def ReflectiveDistance(self, ReflectivePlane):
+        # get normal vector of the plane
+        nv = ReflectivePlane[0:3]
+        d = ReflectivePlane[3]
+
+        for k in range(len(Q)):
+            q = Q[k]
+            dis = (torch.dot(nv, torch.tensor(q))+d)/(torch.dot(nv, nv))
+            q_sym = q - 2*(dis)*nv
+            self.SymPoints.append(q_sym)
+
+    def RotationDistance(self, RotationAxis):
+        
+
+    def totalDis(self):
 
 class RegularizationLoss(nn.Module):
     def __init__(self):
         super(RegularizationLoss, self).__init__()
     
-    def forward(self, output, target):
+    def forward(self, output):
         # todo
+
+    def totalLoss(self)
