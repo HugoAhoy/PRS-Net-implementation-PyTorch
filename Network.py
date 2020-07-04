@@ -93,7 +93,19 @@ class PRSNet(nn.Module):
             o5 = o5/torch.norm(o5, dim = 1)
             o6 = o6/torch.norm(o6, dim = 1)
 
-            return (o1,o2,o3,o4,o5,o6)
+            self.batchoutput = torch.zeros(o1.shape[0], 6, 4)
+            self.reshapeOutput(o1, 1)
+            self.reshapeOutput(o2, 2)
+            self.reshapeOutput(o3, 3)
+            self.reshapeOutput(o4, 4)
+            self.reshapeOutput(o5, 5)
+            self.reshapeOutput(o6, 6)
+
+            return self.batchoutput
+        # reshape output
+        def reshapeOutput(self, output, pos)
+            for i in range(self.batchoutput.shape[0]):
+                self.batchoutput[i][pos] = output[i]
 
 class SymmetryDistanceLoss(nn.Module):
     def __init__(self):
@@ -108,10 +120,10 @@ class SymmetryDistanceLoss(nn.Module):
             self.batch = batch
             self.SymPoints = []
             for i in range(3):
-                self.ReflectiveDistance(target[batch][i])
+                self.ReflectiveDistance(output[batch][i])
 
             for i in range(3,6):
-                self.RotationDistance(target[batch][i])
+                self.RotationDistance(output[batch][i])
             
             self.loss = self.loss + self.totalDis()
         
@@ -128,16 +140,73 @@ class SymmetryDistanceLoss(nn.Module):
             q_sym = q - 2*(dis)*nv
             self.SymPoints.append(q_sym)
 
-    def RotationDistance(self, RotationAxis):
-        
+    def RotationDistance(self, RotationQuater):
+        for k in range(len(Q)):
+            q = Q[k]
+            q_hat = torch.zeros(4)
+            q_hat[1:] = q
+            q_sym = self.QuaternionProduct(QuaternionProduct(RotationQuater,q_hat), self.QuaternionInverse(RotationQuater))[1:]
+            self.SymPoints.append(q_sym)
 
     def totalDis(self):
+        totalDis = 0
+        for i in range(self.SymPoints):
+            x, y, z = SymPoints[i]
+            if x < 0:
+                x = 0
+            elif x > 32:
+                x = 32
+            
+            if y < 0:
+                y = 0
+            elif y > 32:
+                y = 32
+            if z < 0:
+                z = 0
+            elif z > 32:
+                z = 32
+
+            CP = self.ClosestGrid[int(x)][int(y)][int(z)]
+            totalDis = totalDis + torch.norm(SymPoints[i] - CP)
+
+        return totalDis
+
+    # 四元数乘法
+    # q1q2 = (s1s2 - v1·v2) +s1v2 + s2v1 + v1Xv2
+    def QuaternionProduct(self, Qa, Qb):
+        Qres = torch.zeros(4)
+        Qres[0] = Qa[0]*Qb[0] - torch.dot(Qa[1:], Qb[1:])
+        Qres[1:] = Qa[0]*Qb[1:] + Qb[0]*Qa[1:] + torch.cross(Qa[1:], Qb[1:])
+
+        return Qres
+
+
+    def QuaternionInverse(self, Quaternion):
+        Qi = torch.zeros(4)
+        Qi[1:] = -Quaternion[1:]
+        Qi[0] = Quaternion[0]
+        Qi = Qi/ torch.norm(Quaternion)
+        return Qi
 
 class RegularizationLoss(nn.Module):
     def __init__(self):
         super(RegularizationLoss, self).__init__()
     
     def forward(self, output):
-        # todo
+        batchSize = output.shape[0]
+        self.loss = torch.tensor(0)
+        for batch in range(batchSize):
+            M1 = torch.zeros(3,3)
+            M2 = torch.zeros(3,3)
+            for i in range(3):
+                M1[i] = output[batch][i]
 
-    def totalLoss(self)
+            for i in range(3, 6):
+                M2[i-3] = output[batch][i]
+            I = torch.eye(3)
+            A = torch.mm(M1, torch.t(M1)) - I
+            B = torch.mm(M2, torch.t(M2)) - I
+
+            self.loss = self.loss + torch.norm(A, p='fro')**2 + torch.norm(B, p = 'fro')**2
+
+        return self.loss/batchSize
