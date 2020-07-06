@@ -29,15 +29,15 @@ class SymmetryDistanceLoss(nn.Module):
         nv = ReflectivePlane[0:3]
         d = ReflectivePlane[3]
 
-        for k in range(len(Q)):
-            q = Q[k]
+        for k in range(len(self.Q)):
+            q = self.Q[k]
             dis = (torch.dot(nv, torch.tensor(q))+d)/(torch.dot(nv, nv))
             q_sym = q - 2*(dis)*nv
             self.SymPoints.append(q_sym)
 
     def RotationDistance(self, RotationQuater):
-        for k in range(len(Q)):
-            q = Q[k]
+        for k in range(len(self.Q)):
+            q = self.Q[k]
             q_hat = torch.zeros(4)
             q_hat[1:] = q
             q_sym = self.QuaternionProduct(QuaternionProduct(RotationQuater,q_hat), self.QuaternionInverse(RotationQuater))[1:]
@@ -61,7 +61,7 @@ class SymmetryDistanceLoss(nn.Module):
             elif z > 32:
                 z = 32
 
-            CP = self.ClosestGrid[int(x)][int(y)][int(z)]
+            CP = torch.tensor(self.ClosestGrid[int(x)*32*32+int(y)*32+int(z)])
             totalDis = totalDis + torch.norm(SymPoints[i] - CP)
 
         return totalDis

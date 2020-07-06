@@ -1,4 +1,6 @@
 from torch.utils.data import Dataset
+import DataPreProc
+import numpy as np
 
 class MyDataset(Dataset):
     def __init__(self, DataRoot, Train = True):
@@ -16,5 +18,12 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         # todo
-        
-        
+        voxel = DataPreProc.binvox2Tensor('./data/{}.binvox'.format(index))
+        cloudPoint = DataPreProc.getPointCloud('./data/{}.pcd'.format(index))
+        closest = DataPreProc.calculateClosestGrid('./data/{}.pcd'.format(index))
+        target = {
+            'voxel':voxel,
+            'points':cloudPoint,
+            'closest':closest
+        }
+        return target
