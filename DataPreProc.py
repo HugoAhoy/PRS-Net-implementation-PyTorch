@@ -25,7 +25,7 @@ def getPointCloud(filepath):
                 if line.split()[0] == "DATA":
                     datastart = True
             else:
-                cloudPoint = []
+                pointCloud = []
                 points = line.split()
                 x = float(points[0])
                 y = float(points[1])
@@ -33,21 +33,21 @@ def getPointCloud(filepath):
                 maxPos = max(maxPos, x, y, z)
                 minPos = min(minPos, x, y, z)
                 cloudPoint.append([x, y, z])
-        cloudPoint = torch.tensor(cloudPoint)
+        pointCloud = torch.tensor(pointCloud)
 
         # 对标对齐
-        cloudPoint = (cloudPoint - min)/max * 32
+        pointCloud = (pointCloud - min)/max * 32
 
+# return a numpy array
 def calculateClosestGrid(filepath):
-    cloudPoint = getPointCloud(filepath)
+    pointCloud = getPointCloud(filepath)
     ans = np.zeros((32*32*32, 3),dtype='int')
     for i in range(32):
         for j in range(32):
             for k in range(32):
-                _, pos = torch.min(torch.norm(cloudPoint - torch.tensor([i, j, k],dtype = torch.float),dim = 1), dim = 0)
+                _, pos = torch.min(torch.norm(pointCloud - torch.tensor([i, j, k],dtype = torch.float),dim = 1), dim = 0)
                 x, y, z = cloudPoint[pos]
                 ans[i*32*32+j*32 + k] = [int(x), int(y), int(z)]
-    
     return ans 
 
 
