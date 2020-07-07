@@ -94,10 +94,13 @@ class RegularizationLoss(nn.Module):
             M1 = torch.zeros(3,3)
             M2 = torch.zeros(3,3)
             for i in range(3):
-                M1[i] = output[batch][i]
+                M1[i] = output[batch][i][:3]
+                M1[i] = M1[i]/torch.norm(M1[i])
 
             for i in range(3, 6):
-                M2[i-3] = output[batch][i]
+                M2[i-3] = output[batch][i][1:]
+                M2[i] = M2[i]/torch.norm(M2[i])
+
             I = torch.eye(3)
             A = torch.mm(M1, torch.t(M1)) - I
             B = torch.mm(M2, torch.t(M2)) - I
