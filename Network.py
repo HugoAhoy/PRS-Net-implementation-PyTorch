@@ -4,8 +4,8 @@ import torch.nn as nn
 class PRSNet(nn.Module):
     def __init__(self):
         super(PRSNet, self).__init__()    
-        self.L1 = nn.Conv3d(in_channels = 4,
-                            out_channels = 8,
+        self.L1 = nn.Conv3d(in_channels = 1,
+                            out_channels = 4,
                             kernel_size= 3,
                             stride = 1,
                             padding = 1)
@@ -14,18 +14,18 @@ class PRSNet(nn.Module):
                             kernel_size= 3,
                             stride = 1,
                             padding = 1)
-        self.L3 = nn.Conv3d(in_channels = 4,
-                            out_channels = 8,
+        self.L3 = nn.Conv3d(in_channels = 8,
+                            out_channels = 16,
                             kernel_size= 3,
                             stride = 1,
                             padding = 1)
-        self.L4 = nn.Conv3d(in_channels = 4,
-                            out_channels = 8,
+        self.L4 = nn.Conv3d(in_channels = 16,
+                            out_channels = 32,
                             kernel_size= 3,
                             stride = 1,
                             padding = 1)
-        self.L5 = nn.Conv3d(in_channels = 4,
-                            out_channels = 8,
+        self.L5 = nn.Conv3d(in_channels = 32,
+                            out_channels = 64,
                             kernel_size= 3,
                             stride = 1,
                             padding = 1)

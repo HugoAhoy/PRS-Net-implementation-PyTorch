@@ -18,9 +18,9 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         # todo
-        voxel = DataPreProc.binvox2Tensor('./data/{}.binvox'.format(index))
-        pointCloud = DataPreProc.getPointCloud('./data/{}.pcd'.format(index))
-        closest = DataPreProc.calculateClosestGrid('./data/{}.pcd'.format(index))
+        voxel = DataPreProc.binvox2Tensor('./data/datas/{}.binvox'.format(index))
+        pointCloud = DataPreProc.getPointCloud('./data/datas/{}.pcd'.format(index))
+        closest = DataPreProc.calculateClosestGrid('./data/datas/{}.npy'.format(index))
         target = {
             'voxel':voxel,
             'points':pointCloud,
