@@ -1,9 +1,12 @@
 from torch.utils.data import Dataset
-import DataPreProc
+import utils.DataPreProc as DPP
 import numpy as np
+import os
 
 class MyDataset(Dataset):
     def __init__(self, DataRoot, Train = True):
+        super().__init__()
+        self.dataroot = DataRoot
         datas = []
         self.filename = 'train.txt'
         if not Train:
@@ -18,9 +21,9 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         # todo
-        voxel = DataPreProc.binvox2Tensor('./data/datas/{}.binvox'.format(index))
-        pointCloud = DataPreProc.getPointCloud('./data/datas/{}.pcd'.format(index))
-        closest = DataPreProc.calculateClosestGrid('./data/datas/{}.npy'.format(index))
+        voxel = DPP.binvox2Tensor('{}/datas/{}/{}.binvox'.format(self.dataroot, index, index))
+        pointCloud = DPP.getPointCloud('{}/datas/{}/{}.pcd'.format(self.dataroot, index, index))
+        closest = np.load('{}/datas/{}/{}.npy'.format(self.dataroot, index, index))
         target = {
             'voxel':voxel,
             'points':pointCloud,
