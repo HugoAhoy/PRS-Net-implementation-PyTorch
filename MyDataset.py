@@ -12,7 +12,7 @@ class MyDataset(Dataset):
         self.filename = 'train.txt'
         if not Train:
             self.filename = 'validate.txt'
-        with open(os.path.join(DataRoot, self.filename)) as f:
+        with open(os.path.join(DataRoot, self.filename), 'r', encoding='utf-8') as f:
             for i in f.read().splitlines():
                 datas.append(i)
         self.datas = datas
@@ -22,13 +22,13 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         # todo
-        voxel = DPP.binvox2Tensor('{}/datas/{}/{}.binvox'.format(self.dataroot, index, index)).cuda()
-        pointCloud = DPP.getPointCloud('{}/datas/{}/{}.pcd'.format(self.dataroot, index, index)).cuda()
-        closest = np.load('{}/datas/{}/{}.npy'.format(self.dataroot, index, index))
+        voxel = DPP.binvox2Tensor('{}/datas/{}/{}.binvox'.format(self.dataroot, self.datas[index],  self.datas[index])).cuda()
+        pointCloud = DPP.getPointCloud('{}/datas/{}/{}.pcd'.format(self.dataroot, self.datas[index], self.datas[index])).cuda()
+        closest = np.load('{}/datas/{}/{}.npy'.format(self.dataroot, self.datas[index], self.datas[index]))
         closest = torch.tensor(closest, dtype = torch.float32).cuda()
         target = {
             'voxel':voxel,
             'points':pointCloud,
-            'closest':closest
+            'closest':closest,
         }
         return target

@@ -1,8 +1,9 @@
+import torch
 import Network
-import MyDataset
+import MyDataset as MD
 from torch.utils.data import DataLoader
 import torch.optim as optim
-import torch
+import LossFunction as loss
 
 batchsize = 4
 epoch = 100
@@ -10,35 +11,32 @@ RegularWeight = 25
 LR = 0.01
 resolution = 32
 
-def train():
+def train(epoch, batchsize, RegularWeight, LR):
     prsnet = Network.PRSNet()
     # 设置gpu
     device = torch.device("cuda:{}".format(torch.cuda.current_device()) if torch.cuda.is_available() else "cpu")
     prsnet.to(device)
 
     optimizer = optim.Adam(prsnet.parameters(), lr = LR)
-    LossSym = SymmetryDistanceLoss()
-    LossReg = RegularizationLoss()
+    LossSym = loss.SymmetryDistanceLoss()
+    LossReg = loss.RegularizationLoss()
 
-    dataset = MyDataset("./data")
+    dataset = MD.MyDataset("./data")
     dataloader = DataLoader(dataset, batch_size = batchsize, shuffle = True)
     bestLoss = float("inf")
     for e in range(1,epoch):
         totalLoss = 0
         for i, data in enumerate(dataloader):
             optimizer.zero_grad()
-            # voxel = torch.zeros(batchsize, resolution, resolution, resolution)
-            # for j in range(batchsize):
-            #     voxel[j] = torch.tensor(data[j]['voxel'])
             output = prsnet(data['voxel'])
 
-            loss = LossSym(output, data) + RegularWeight*LossReg(output, data)
+            loss = LossSym(output, data) + RegularWeight*LossReg(output)
             
-            totalLoss = totalLoss + int(loss)
+            totalLoss = totalLoss + float(loss)
             
             loss.backward()
             optimizer.step()
-            
+        print("epoch {}, loss:{}".format(e, totalLoss))
         if totalLoss < bestLoss:
             torch.save(prsnet, 'net_best.pkl')
 
@@ -47,4 +45,4 @@ def train():
     
             
 if __name__ == "__main__":
-    train()
+    train(epoch, batchsize, RegularWeight, LR)
