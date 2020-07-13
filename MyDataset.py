@@ -1,3 +1,4 @@
+import torch
 from torch.utils.data import Dataset
 import utils.DataPreProc as DPP
 import numpy as np
@@ -21,9 +22,10 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         # todo
-        voxel = DPP.binvox2Tensor('{}/datas/{}/{}.binvox'.format(self.dataroot, index, index))
-        pointCloud = DPP.getPointCloud('{}/datas/{}/{}.pcd'.format(self.dataroot, index, index))
+        voxel = DPP.binvox2Tensor('{}/datas/{}/{}.binvox'.format(self.dataroot, index, index)).cuda()
+        pointCloud = DPP.getPointCloud('{}/datas/{}/{}.pcd'.format(self.dataroot, index, index)).cuda()
         closest = np.load('{}/datas/{}/{}.npy'.format(self.dataroot, index, index))
+        closest = torch.tensor(closest, dtype = torch.float32).cuda()
         target = {
             'voxel':voxel,
             'points':pointCloud,
