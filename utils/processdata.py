@@ -11,9 +11,9 @@ def OBJtoBinvox(datadir, filedir, index):
 def OBJtoPCD(datadir, filedir, index):
     # ClosestSamplingCmd = "pcl_mesh_sampling.exe -no_vis_result {} {}\\{}_closest.pcd".format(filedir, datadir, index)
     SamplingCmd = "pcl_mesh_sampling.exe -n_samples 1000 -no_vis_result {} {}\\{}.pcd".format(filedir, datadir, index)
-    print(ClosestSamplingCmd)
+    # print(ClosestSamplingCmd)
     print(SamplingCmd)
-    os.system(ClosestSamplingCmd)
+    # os.system(ClosestSamplingCmd)
     os.system(SamplingCmd)
 
 def getClosestGrid(datadir, index):

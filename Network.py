@@ -56,7 +56,7 @@ class PRSNet(nn.Module):
 
         self.AF = nn.LeakyReLU(negative_slope=0.01, inplace=False)
 
-    @torchsnooper.snoop()
+    # @torchsnooper.snoop()
     def forward(self, input):
         out = self.AF(self.MP(self.L1(input)))
         out = self.AF(self.MP(self.L2(out)))
@@ -84,18 +84,18 @@ class PRSNet(nn.Module):
         o1 = self.AF(self.FC13(o1))
         o2 = self.AF(self.FC23(o2))
         o3 = self.AF(self.FC33(o3))
-        o1 = self.AF(self.FC43(o4))
-        o2 = self.AF(self.FC53(o5))
-        o3 = self.AF(self.FC63(o6))
+        o4 = self.AF(self.FC43(o4))
+        o5 = self.AF(self.FC53(o5))
+        o6 = self.AF(self.FC63(o6))
 
-        o1 = o1/torch.norm(o1, dim = 1)
-        o2 = o2/torch.norm(o2, dim = 1)
-        o3 = o3/torch.norm(o3, dim = 1)
-        o4 = o4/torch.norm(o4, dim = 1)
-        o5 = o5/torch.norm(o5, dim = 1)
-        o6 = o6/torch.norm(o6, dim = 1)
+        o1 = o1/torch.norm(o1, dim = 0)
+        o2 = o2/torch.norm(o2, dim = 0)
+        o3 = o3/torch.norm(o3, dim = 0)
+        o4 = o4/torch.norm(o4, dim = 0)
+        o5 = o5/torch.norm(o5, dim = 0)
+        o6 = o6/torch.norm(o6, dim = 0)
 
-        self.batchoutput = torch.zeros(o1.shape[0], 6, 4)
+        self.batchoutput = torch.zeros(o1.shape[0], 6, 4).cuda()
         self.reshapeOutput(o1, 1)
         self.reshapeOutput(o2, 2)
         self.reshapeOutput(o3, 3)
@@ -107,5 +107,5 @@ class PRSNet(nn.Module):
         # reshape output
     def reshapeOutput(self, output, pos):
         for i in range(self.batchoutput.shape[0]):
-            self.batchoutput[i][pos] = output[i]
+            self.batchoutput[i][pos - 1] = output[i]
 
